@@ -17,4 +17,22 @@ when "Search by postcode"
     #   end
 end
 
+exit_chosen = false
+while !exit_chosen
+    choices = {"Change city" => 1, "Today's weather" => 2, "7 Day forecast" => 3, "Exit" => 4}
+    menu_selection = prompt.select("Please choose an option:", choices)
+    case menu_selection
+    when 1
+        puts "CHANGING CITY PROCESS ..."
+    when 2
+        puts "Show today's weather"
+    when 3
+        puts "Show 7 day forecast"
+    when 4
+        exit_chosen = true
+    end
+end
+
+
+
 
