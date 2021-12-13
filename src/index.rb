@@ -2,33 +2,39 @@ require "httparty"
 require "tty-prompt"
 prompt = TTY::Prompt.new
 
-search_method = prompt.select("Please choose an option:", ["Search by city name", "Search by postcode"])
-
-case search_method
-when "Search by city name"
-    # need to look into this
-    # prompt.ask("Please enter a city name") do |q|
-    #     q.modify :strip, :collapse
-    #   end
-when "Search by postcode"
-    # need to look into this
-    # prompt.ask("Please enter a postcode", convert: :integer) do |q|
-    #     q.convert(:integer, "Please enter a valid postcode")
-    #   end
+def change_city
+    prompt = TTY::Prompt.new
+    search_method = prompt.select("Please choose an option:", ["Search by city name", "Search by postcode"])
+    
+    case search_method
+    when "Search by city name"
+        city_name = prompt.ask("Please enter a city name", required: true) do |q|
+            q.modify :strip, :down
+        end
+        city_name.gsub!(" ", "+")
+        puts city_name
+    when "Search by postcode"
+        postcode = prompt.ask("Please enter a postcode", convert: :integer) do |q|
+            q.validate(/^[0-9]{4}$/)
+            q.messages[:valid?] = "Invalid postcode. Please enter a valid 4-digit Australian postcode"
+        end
+    end
 end
+
+change_city
 
 exit_chosen = false
 while !exit_chosen
-    choices = {"Change city" => 1, "Today's weather" => 2, "7 Day forecast" => 3, "Exit" => 4}
+    choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
     menu_selection = prompt.select("Please choose an option:", choices)
     case menu_selection
-    when 1
-        puts "CHANGING CITY PROCESS ..."
-    when 2
+    when "Change city"
+        change_city
+    when "Today's weather"
         puts "Show today's weather"
-    when 3
+    when "7 Day forecast"
         puts "Show 7 day forecast"
-    when 4
+    when "Exit"
         exit_chosen = true
     end
 end
