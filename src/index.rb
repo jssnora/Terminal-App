@@ -1,6 +1,11 @@
 require "httparty"
 require "tty-prompt"
+require "tty-box"
 prompt = TTY::Prompt.new
+
+$city_name = ""
+$postcode = 0
+
 
 def change_city
     prompt = TTY::Prompt.new
@@ -8,16 +13,19 @@ def change_city
     
     case search_method
     when "Search by city name"
-        city_name = prompt.ask("Please enter a city name", required: true) do |q|
+        input_city_name = prompt.ask("Please enter a city name", required: true) do |q|
             q.modify :strip, :down
         end
-        city_name.gsub!(" ", "+")
-        puts city_name
+        input_city_name.gsub!(" ", "+")
+        $city_name = input_city_name
+        $postcode = nil
     when "Search by postcode"
-        postcode = prompt.ask("Please enter a postcode", convert: :integer) do |q|
+        input_postcode = prompt.ask("Please enter a postcode", convert: :integer) do |q|
             q.validate(/^[0-9]{4}$/)
             q.messages[:valid?] = "Invalid postcode. Please enter a valid 4-digit Australian postcode"
         end
+        $city_name = nil
+        $postcode = input_postcode
     end
 end
 
@@ -32,6 +40,7 @@ while !exit_chosen
         change_city
     when "Today's weather"
         puts "Show today's weather"
+
     when "7 Day forecast"
         puts "Show 7 day forecast"
     when "Exit"
