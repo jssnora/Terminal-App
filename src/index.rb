@@ -1,5 +1,6 @@
 require "httparty"
 require "tty-prompt"
+require "tty-table"
 require "dotenv/load"
 prompt = TTY::Prompt.new
 api_key = ENV["api_key"]
@@ -26,7 +27,7 @@ def validate_postcode(postcode)
     if response["cod"].to_i == 200
         associated_city = response["name"].downcase.gsub(" ", "+")
         $city_name = associated_city
-    elsif response["cod"].to_i == 404
+    elsif response["cod"].to_i == 404 || 400
         puts "ERROR - Postcode not found. Please enter a valid Australian postcode"
     else
         puts "Some error has occurred, please try again."
@@ -35,7 +36,7 @@ end
 
 def change_city
     prompt = TTY::Prompt.new
-    search_method = prompt.select("Please choose an option:", ["Search by city name", "Search by postcode"])
+    search_method = prompt.select("Please choose an option to view the weather:", ["Search by city name", "Search by postcode"])
     
     case search_method
     when "Search by city name"
@@ -53,28 +54,28 @@ def change_city
     end
 end
 
-while !$city_name
-    change_city
+exit_chosen = false
+while !exit_chosen
+    if !$city_name
+        choices = ["Select city", {name: "Today's weather", disabled: "(Please select a city first)"}, {name: "7 Day forecast", disabled:"(Please select a city first)" }, "Exit"]
+    else
+        choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
+    end
+    
+    menu_selection = prompt.select("Please choose an option:", choices)
+    case menu_selection
+    when "Select city"
+        change_city
+    when "Change city"
+        change_city
+    when "Today's weather"
+        puts "Show today's weather"
+    when "7 Day forecast"
+        puts "Show 7 day forecast"
+    when "Exit"
+        exit_chosen = true
+    end
 end
-
-p $city_name
-
-# exit_chosen = false
-# while !exit_chosen
-#     choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
-#     menu_selection = prompt.select("Please choose an option:", choices)
-#     case menu_selection
-#     when "Change city"
-#         change_city
-#     when "Today's weather"
-#         puts "Show today's weather"
-
-#     when "7 Day forecast"
-#         puts "Show 7 day forecast"
-#     when "Exit"
-#         exit_chosen = true
-#     end
-# end
 
 
 

@@ -4,38 +4,9 @@ require "dotenv/load"
 prompt = TTY::Prompt.new
 api_key = ENV["api_key"]
 
-$city_name = nil
-
-def validate_city(city)
-    api_key = ENV["api_key"]
-    response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?q=#{city},au&units=metric&appid=#{api_key}").parsed_response
-
-    if response["cod"].to_i == 200
-        $city_name = city
-    elsif response["cod"].to_i == 404
-        puts "ERROR - City not found. Please enter a valid Australian city name"
-    else
-        puts "Some error has occurred, please try again."
-    end
-end
-
-def validate_postcode(postcode)
-    api_key = ENV["api_key"]
-    response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?zip=#{postcode},au&units=metric&appid=#{api_key}").parsed_response
-
-    if response["cod"].to_i == 200
-        associated_city = response["name"].downcase.gsub(" ", "+")
-        $city_name = associated_city
-    elsif response["cod"].to_i == 404
-        puts "ERROR - Postcode not found. Please enter a valid Australian postcode"
-    else
-        puts "Some error has occurred, please try again."
-    end
-end
-
 def change_city
     prompt = TTY::Prompt.new
-    search_method = prompt.select("Please choose an option:", ["Search by city name", "Search by postcode"])
+    search_method = prompt.select("Please choose an option to view the weather:", ["Search by city name", "Search by postcode", "Exit"])
     
     case search_method
     when "Search by city name"
@@ -50,31 +21,12 @@ def change_city
             q.messages[:valid?] = "Invalid postcode. Please enter a valid 4-digit Australian postcode"
         end
         validate_postcode(input_postcode)
+    when "Exit"
+        exit_chosen = true
     end
 end
 
+exit_chosen = false
 while !$city_name
     change_city
 end
-
-p $city_name
-
-# response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?q=#{$city_name},au&units=metric&appid=#{api_key}")
-
-# p response
-# exit_chosen = false
-# while !exit_chosen
-#     choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
-#     menu_selection = prompt.select("Please choose an option:", choices)
-#     case menu_selection
-#     when "Change city"
-#         change_city
-#     when "Today's weather"
-#         puts "Show today's weather"
-
-#     when "7 Day forecast"
-#         puts "Show 7 day forecast"
-#     when "Exit"
-#         exit_chosen = true
-#     end
-# end
