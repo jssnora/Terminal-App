@@ -57,7 +57,7 @@ end
 exit_chosen = false
 while !exit_chosen
     if !$city_name
-        choices = ["Select city", {name: "Today's weather", disabled: "(Please select a city first)"}, {name: "7 Day forecast", disabled:"(Please select a city first)" }, "Exit"]
+        choices = ["Select city", {name: "Today's weather", disabled: "(Please select a city to view weather)"}, {name: "7 Day forecast", disabled:"(Please select a city to view weather)" }, "Exit"]
     else
         choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
     end
@@ -69,6 +69,7 @@ while !exit_chosen
     when "Change city"
         change_city
     when "Today's weather"
+        
         puts "Show today's weather"
     when "7 Day forecast"
         puts "Show 7 day forecast"
