@@ -30,36 +30,36 @@ def change_city
     end
 end
 
-def validate_city($city_name, $postcode)
-    case validate
-    when $city_name
-        response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?q=#{$city_name}&units=metric&appid=#{api_key}")
-    when 
+# def validate_city($city_name, $postcode)
+#     case validate
+#     when $city_name
+#         response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?q=#{$city_name}&units=metric&appid=#{api_key}")
+#     when 
         
-    else
+#     else
         
-    end
-end
+#     end
+# end
 
 change_city
 
-exit_chosen = false
-while !exit_chosen
-    choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
-    menu_selection = prompt.select("Please choose an option:", choices)
-    case menu_selection
-    when "Change city"
-        change_city
-    when "Today's weather"
-        puts "Show today's weather"
+response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?q=#{$city_name}&units=metric&appid=#{api_key}")
 
-    when "7 Day forecast"
-        puts "Show 7 day forecast"
-    when "Exit"
-        exit_chosen = true
-    end
-end
+p response
 
+# exit_chosen = false
+# while !exit_chosen
+#     choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
+#     menu_selection = prompt.select("Please choose an option:", choices)
+#     case menu_selection
+#     when "Change city"
+#         change_city
+#     when "Today's weather"
+#         puts "Show today's weather"
 
-
-
+#     when "7 Day forecast"
+#         puts "Show 7 day forecast"
+#     when "Exit"
+#         exit_chosen = true
+#     end
+# end
