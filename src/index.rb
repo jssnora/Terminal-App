@@ -6,6 +6,8 @@ prompt = TTY::Prompt.new
 api_key = ENV["api_key"]
 
 $city_name = nil
+$latitude = nil
+$longitude = nil
 
 def validate_city(city)
     api_key = ENV["api_key"]
@@ -13,6 +15,8 @@ def validate_city(city)
 
     if response["cod"].to_i == 200
         $city_name = city
+        $latitude = response["coord"]["lat"]
+        $longitude = response["coord"]["lon"]
     elsif response["cod"].to_i == 404
         puts "ERROR - City not found. Please enter a valid Australian city name"
     else
@@ -27,6 +31,9 @@ def validate_postcode(postcode)
     if response["cod"].to_i == 200
         associated_city = response["name"].downcase.gsub(" ", "+")
         $city_name = associated_city
+        p response
+        $latitude = response["coord"]["lat"]
+        $longitude = response["coord"]["lon"]
     elsif response["cod"].to_i == 404 || 400
         puts "ERROR - Postcode not found. Please enter a valid Australian postcode"
     else
@@ -54,6 +61,8 @@ def change_city
     end
 end
 
+
+
 exit_chosen = false
 while !exit_chosen
     if !$city_name
@@ -69,7 +78,7 @@ while !exit_chosen
     when "Change city"
         change_city
     when "Today's weather"
-        
+
         puts "Show today's weather"
     when "7 Day forecast"
         puts "Show 7 day forecast"
