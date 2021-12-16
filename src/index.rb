@@ -61,20 +61,31 @@ def change_city
     end
 end
 
-def seven_day_forecast
+def get_weather_data
     api_key = ENV["api_key"]
     response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=#{$latitude}&lon=#{$longitude}&exclude=minutely&units=metric&appid=#{api_key}").parsed_response
+end
+
+def format_seven_day_data(response)
     daily_weather = Array.new
-    for day in response['daily']
+    for day in response["daily"]
         weather_info = Array.new
         weather_info.push(Time.at(day["dt"]).strftime("%A %d/%m/%Y"))
         weather_info.push(day["weather"][0]["description"].capitalize)
-        weather_info.push(day["weather"][0]["icon"])
         weather_info.push(day["temp"]["max"].to_s + " degrees")
         weather_info.push(day["temp"]["min"].to_s + " degrees")
         weather_info.push((day["pop"]*100).to_s + "% chance of rain")
-        daily_weather.append(weather_info)
+        daily_weather.push(weather_info)
     end
+    return daily_weather
+end
+
+seven_day_table_header = ["Date", "Condition", "Max temperature", "Min temperature", "Chance of rain"]
+todays_weather_table_header = ["Date", "Condition", "Max temperature", "Min temperature", "Chance of rain"]
+
+def table(header_array, data_array)
+    table = TTY::Table.new(header_array, data_array)
+    puts table.render(:unicode)
 end
 
 exit_chosen = false
@@ -92,10 +103,12 @@ while !exit_chosen
     when "Change city"
         change_city
     when "Today's weather"
-
         puts "Show today's weather"
     when "7 Day forecast"
         puts "Show 7 day forecast"
+        response = get_weather_data 
+        table_weather_data = format_seven_day_data(response) 
+        table(seven_day_table_header, table_weather_data)
     when "Exit"
         exit_chosen = true
     end

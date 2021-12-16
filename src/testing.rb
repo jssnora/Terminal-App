@@ -28,7 +28,12 @@ def forecast
     p daily_weather
 end
 
-forecast
+def get_weather_data
+    api_key = ENV["api_key"]
+    response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=30.489772&lon=-99.771335&exclude=minutely,current,hourly,alerts&units=metric&appid=#{api_key}").parsed_response
+end
+
+p get_weather_data
 
 response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=30.489772&lon=-99.771335&exclude=minutely,current,hourly,alerts&units=metric&appid=#{api_key}").parsed_response
 
