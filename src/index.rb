@@ -2,6 +2,7 @@ require "httparty"
 require "tty-prompt"
 require "tty-table"
 require "dotenv/load"
+require "json"
 prompt = TTY::Prompt.new
 api_key = ENV["api_key"]
 
@@ -31,7 +32,6 @@ def validate_postcode(postcode)
     if response["cod"].to_i == 200
         associated_city = response["name"].downcase.gsub(" ", "+")
         $city_name = associated_city
-        p response
         $latitude = response["coord"]["lat"]
         $longitude = response["coord"]["lon"]
     elsif response["cod"].to_i == 404 || 400
@@ -61,7 +61,21 @@ def change_city
     end
 end
 
-
+def seven_day_forecast
+    api_key = ENV["api_key"]
+    response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=#{$latitude}&lon=#{$longitude}&exclude=minutely&units=metric&appid=#{api_key}").parsed_response
+    daily_weather = Array.new
+    for day in response['daily']
+        weather_info = Array.new
+        weather_info.push(Time.at(day["dt"]).strftime("%A %d/%m/%Y"))
+        weather_info.push(day["weather"][0]["description"].capitalize)
+        weather_info.push(day["weather"][0]["icon"])
+        weather_info.push(day["temp"]["max"].to_s + " degrees")
+        weather_info.push(day["temp"]["min"].to_s + " degrees")
+        weather_info.push((day["pop"]*100).to_s + "% chance of rain")
+        daily_weather.append(weather_info)
+    end
+end
 
 exit_chosen = false
 while !exit_chosen
