@@ -6,40 +6,27 @@ require "json"
 prompt = TTY::Prompt.new
 api_key = ENV["api_key"]
 
-# class Weather
-#     attr_accessor "dt", "min", "max", "description"
-#     def initialize(hash)
-#         self.
 
-def forecast
+response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=30.4898&lon=-99.7713&exclude=minutely&units=metric&appid=#{api_key}").parsed_response
+
+def format_todays_weather_data
     api_key = ENV["api_key"]
-    response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=30.489772&lon=-99.771335&exclude=minutely,current,hourly,alerts&units=metric&appid=#{api_key}").parsed_response
-    daily_weather = Array.new
-    for day in response['daily']
-        weather_info = Array.new
-        weather_info.push(Time.at(day["dt"]).strftime("%A %d/%m/%Y"))
-        weather_info.push(day["weather"][0]["description"].capitalize)
-        weather_info.push(day["weather"][0]["icon"])
-        weather_info.push(day["temp"]["max"].to_s + " degrees")
-        weather_info.push(day["temp"]["min"].to_s + " degrees")
-        weather_info.push((day["pop"]*100).to_s + "% chance of rain")
-        daily_weather.append(weather_info)
-    end
-    p daily_weather
+    response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=30.4898&lon=-99.7713&exclude=minutely&units=metric&appid=#{api_key}").parsed_response
+    weather_info = Array.new
+    today_array = response["daily"][0]
+    weather_info.push(Time.at(today_array["dt"]).strftime("%A %d/%m/%Y"))
+    weather_info.push(today_array["weather"][0]["description"].capitalize)
+    weather_info.push(today_array["temp"]["max"].round(2).to_s + " degrees")
+    weather_info.push(today_array["temp"]["min"].round(2).to_s + " degrees")
+    weather_info.push(today_array["feels_like"]["day"].round(2).to_s + " degrees")
+    weather_info.push((today_array["pop"]*100).round(0).to_s + "% chance of rain")
+    weather_info.push(today_array["uvi"])
+    weather_info.push(today_array["wind_speed"])
+    weather_info.push(today_array["humidity"])
+    weather_info.push(today_array["sunrise"], today_array["sunset"])
+    return weather_info
 end
 
-def get_weather_data
-    api_key = ENV["api_key"]
-    response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=30.489772&lon=-99.771335&exclude=minutely,current,hourly,alerts&units=metric&appid=#{api_key}").parsed_response
-end
 
-p get_weather_data
-
-response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=30.489772&lon=-99.771335&exclude=minutely,current,hourly,alerts&units=metric&appid=#{api_key}").parsed_response
-
-
-# p Time.at(response["daily"][0]["dt"]).strftime("%A %d/%m/%Y")
-
-# File.write('./weather-data.json', JSON.dump(response))
-# .strftime(%A %d/%m/%Y)
+p format_todays_weather_data
 

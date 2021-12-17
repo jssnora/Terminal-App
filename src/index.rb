@@ -2,9 +2,8 @@ require "httparty"
 require "tty-prompt"
 require "tty-table"
 require "dotenv/load"
-require "json"
+
 prompt = TTY::Prompt.new
-api_key = ENV["api_key"]
 
 $city_name = nil
 $latitude = nil
@@ -12,6 +11,9 @@ $longitude = nil
 
 def validate_city(city)
     api_key = ENV["api_key"]
+    # link = "http://api.openweathermap.org/data/2.5/weather?q=#{city},au&units=metric&appid=#{api_key}"
+    # p link
+    # response = HTTParty.get(link).parsed_response
     response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?q=#{city},au&units=metric&appid=#{api_key}").parsed_response
 
     if response["cod"].to_i == 200
@@ -22,6 +24,7 @@ def validate_city(city)
         puts "ERROR - City not found. Please enter a valid Australian city name"
     else
         puts "Some error has occurred, please try again."
+        p response
     end
 end
 
@@ -34,9 +37,10 @@ def validate_postcode(postcode)
         $city_name = associated_city
         $latitude = response["coord"]["lat"]
         $longitude = response["coord"]["lon"]
-    elsif response["cod"].to_i == 404 || 400
+    elsif response["cod"].to_i == 404 || response["cod"].to_i == 400
         puts "ERROR - Postcode not found. Please enter a valid Australian postcode"
     else
+        p response
         puts "Some error has occurred, please try again."
     end
 end
@@ -72,16 +76,34 @@ def format_seven_day_data(response)
         weather_info = Array.new
         weather_info.push(Time.at(day["dt"]).strftime("%A %d/%m/%Y"))
         weather_info.push(day["weather"][0]["description"].capitalize)
-        weather_info.push(day["temp"]["max"].to_s + " degrees")
-        weather_info.push(day["temp"]["min"].to_s + " degrees")
-        weather_info.push((day["pop"]*100).to_s + "% chance of rain")
+        weather_info.push(day["temp"]["max"].round(2).to_s + " degrees")
+        weather_info.push(day["temp"]["min"].round(2).to_s + " degrees")
+        weather_info.push((day["pop"]*100).round(0).to_s + "% chance of rain")
         daily_weather.push(weather_info)
     end
     return daily_weather
 end
 
+def format_todays_weather_data(response)
+    daily_weather = Array.new
+    weather_info = Array.new
+    today_array = response["daily"][0]
+    weather_info.push(Time.at(today_array["dt"]).strftime("%A %d/%m/%Y"))
+    weather_info.push(today_array["weather"][0]["description"].capitalize)
+    weather_info.push(today_array["temp"]["max"].round(2).to_s + " degrees")
+    weather_info.push(today_array["temp"]["min"].round(2).to_s + " degrees")
+    weather_info.push(today_array["feels_like"]["day"].round(2).to_s + " degrees")
+    weather_info.push((today_array["pop"]*100).round(0).to_s + "% chance of rain")
+    weather_info.push(today_array["uvi"])
+    weather_info.push(today_array["wind_speed"])
+    weather_info.push(today_array["humidity"])
+    weather_info.push("Sunrise at " + Time.at(today_array["sunrise"]).strftime("%I:%M%p") + " Sunset at " + Time.at(today_array["sunset"]).strftime("%I:%M%p"))
+    daily_weather.push(weather_info)
+    return daily_weather
+end
+
 seven_day_table_header = ["Date", "Condition", "Max temperature", "Min temperature", "Chance of rain"]
-todays_weather_table_header = ["Date", "Condition", "Max temperature", "Min temperature", "Chance of rain"]
+todays_weather_table_header = ["Date", "Condition", "Max temperature", "Min temperature", "Feels like", "Chance of rain", "UV Index", "Wind speed", "Humidity", "Sunrise/sunset time"]
 
 def table(header_array, data_array)
     table = TTY::Table.new(header_array, data_array)
@@ -95,7 +117,7 @@ while !exit_chosen
     else
         choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
     end
-    
+
     menu_selection = prompt.select("Please choose an option:", choices)
     case menu_selection
     when "Select city"
@@ -103,11 +125,14 @@ while !exit_chosen
     when "Change city"
         change_city
     when "Today's weather"
-        puts "Show today's weather"
-    when "7 Day forecast"
-        puts "Show 7 day forecast"
         response = get_weather_data 
-        table_weather_data = format_seven_day_data(response) 
+        table_weather_data = format_todays_weather_data(response) 
+        p todays_weather_table_header
+        p table_weather_data
+        table(todays_weather_table_header, table_weather_data)
+    when "7 Day forecast"
+        response = get_weather_data 
+        table_weather_data = format_seven_day_data(response)
         table(seven_day_table_header, table_weather_data)
     when "Exit"
         exit_chosen = true
