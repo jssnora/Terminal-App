@@ -108,6 +108,17 @@ def table(header_array, data_array)
     puts table.render(:unicode)
 end
 
+system "clear" 
+
+puts "
+                                                                  
+ _____               _         _    _ _ _         _   _           
+|_   _|___ ___ _____|_|___ ___| |  | | | |___ ___| |_| |_ ___ ___ 
+  | | | -_|  _|     | |   | .'| |  | | | | -_| .'|  _|   | -_|  _|
+  |_| |___|_| |_|_|_|_|_|_|__,|_|  |_____|___|__,|_| |_|_|___|_|  
+                                                                  
+
+"
 exit_chosen = false
 while !exit_chosen
     if !$city_name
@@ -116,29 +127,20 @@ while !exit_chosen
         choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
     end
 
-    puts " 
-                                                                                  
-  _____                  _            _    _ _ _            _    _             
- |_   _|___  ___  _____ |_| ___  ___ | |  | | | | ___  ___ | |_ | |_  ___  ___ 
-   | | | -_||  _||     || ||   || .'|| |  | | | || -_|| .'||  _||   || -_||  _|
-   |_| |___||_|  |_|_|_||_||_|_||__,||_|  |_____||___||__,||_|  |_|_||___||_|  
-                                                                               
- 
-   "
-
     menu_selection = prompt.select("Please choose an option to view weather:", choices)
     case menu_selection
     when "Select city"
         change_city
     when "Change city"
+        system "clear"
         change_city
     when "Today's weather"
+        system "clear"
         response = get_weather_data 
         table_weather_data = format_todays_weather_data(response) 
-        p todays_weather_table_header
-        p table_weather_data
         table(todays_weather_table_header, table_weather_data)
     when "7 Day forecast"
+        system "clear"
         response = get_weather_data 
         table_weather_data = format_seven_day_data(response)
         table(seven_day_table_header, table_weather_data)
@@ -146,7 +148,3 @@ while !exit_chosen
         exit_chosen = true
     end
 end
-
-
-
-
