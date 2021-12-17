@@ -11,9 +11,6 @@ $longitude = nil
 
 def validate_city(city)
     api_key = ENV["api_key"]
-    # link = "http://api.openweathermap.org/data/2.5/weather?q=#{city},au&units=metric&appid=#{api_key}"
-    # p link
-    # response = HTTParty.get(link).parsed_response
     response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?q=#{city},au&units=metric&appid=#{api_key}").parsed_response
 
     if response["cod"].to_i == 200
@@ -21,9 +18,9 @@ def validate_city(city)
         $latitude = response["coord"]["lat"]
         $longitude = response["coord"]["lon"]
     elsif response["cod"].to_i == 404
-        puts "ERROR - City not found. Please enter a valid Australian city name"
+        puts "Error - City not found. Please enter a valid Australian city name"
     else
-        puts "Some error has occurred, please try again."
+        puts "An API connection error has occurred, please try again."
         p response
     end
 end
@@ -38,10 +35,10 @@ def validate_postcode(postcode)
         $latitude = response["coord"]["lat"]
         $longitude = response["coord"]["lon"]
     elsif response["cod"].to_i == 404 || response["cod"].to_i == 400
-        puts "ERROR - Postcode not found. Please enter a valid Australian postcode"
+        puts "Error - Postcode not found. Please enter a valid Australian postcode"
     else
         p response
-        puts "Some error has occurred, please try again."
+        puts "An API connection error has occurred, please try again."
     end
 end
 
@@ -58,8 +55,9 @@ def change_city
         validate_city(input_city_name)
     when "Search by postcode"
         input_postcode = prompt.ask("Please enter a postcode:", convert: :integer, required: true) do |q|
+            q.convert(:integer, "Error - Number input only. Please enter a valid 4-digit Australian postcode")
             q.validate(/^[0-9]{4}$/)
-            q.messages[:valid?] = "Invalid postcode. Please enter a valid 4-digit Australian postcode"
+            q.messages[:valid?] = "Error - Invalid postcode. Please enter a valid 4-digit Australian postcode"
         end
         validate_postcode(input_postcode)
     end
@@ -95,8 +93,8 @@ def format_todays_weather_data(response)
     weather_info.push(today_array["feels_like"]["day"].round(2).to_s + " degrees")
     weather_info.push((today_array["pop"]*100).round(0).to_s + "% chance of rain")
     weather_info.push(today_array["uvi"])
-    weather_info.push(today_array["wind_speed"])
-    weather_info.push(today_array["humidity"])
+    weather_info.push(today_array["wind_speed"].to_s + " meter/sec")
+    weather_info.push(today_array["humidity"].to_s + " %")
     weather_info.push("Sunrise at " + Time.at(today_array["sunrise"]).strftime("%I:%M%p") + " Sunset at " + Time.at(today_array["sunset"]).strftime("%I:%M%p"))
     daily_weather.push(weather_info)
     return daily_weather
@@ -118,7 +116,17 @@ while !exit_chosen
         choices = ["Change city", "Today's weather", "7 Day forecast" , "Exit"]
     end
 
-    menu_selection = prompt.select("Please choose an option:", choices)
+    puts " 
+                                                                                  
+  _____                  _            _    _ _ _            _    _             
+ |_   _|___  ___  _____ |_| ___  ___ | |  | | | | ___  ___ | |_ | |_  ___  ___ 
+   | | | -_||  _||     || ||   || .'|| |  | | | || -_|| .'||  _||   || -_||  _|
+   |_| |___||_|  |_|_|_||_||_|_||__,||_|  |_____||___||__,||_|  |_|_||___||_|  
+                                                                               
+ 
+   "
+
+    menu_selection = prompt.select("Please choose an option to view weather:", choices)
     case menu_selection
     when "Select city"
         change_city
