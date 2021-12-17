@@ -2,6 +2,7 @@ require "httparty"
 require "tty-prompt"
 require "tty-table"
 require "dotenv/load"
+require "colorize"
 
 prompt = TTY::Prompt.new
 
@@ -108,8 +109,8 @@ def table(header_array, data_array)
     puts table.render(:unicode)
 end
 
-system "clear" 
 
+system "clear" 
 puts "
                                                                   
  _____               _         _    _ _ _         _   _           
@@ -118,7 +119,7 @@ puts "
   |_| |___|_| |_|_|_|_|_|_|__,|_|  |_____|___|__,|_| |_|_|___|_|  
                                                                   
 
-"
+".colorize(:cyan)
 exit_chosen = false
 while !exit_chosen
     if !$city_name
