@@ -4,8 +4,6 @@ require "tty-table"
 require "dotenv/load"
 require "colorize"
 
-#API key "b62d4795f596daf817763620b626ddcb"
-
 prompt = TTY::Prompt.new
 
 $city_name = nil
