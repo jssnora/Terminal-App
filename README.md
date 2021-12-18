@@ -47,3 +47,9 @@ https://trello.com/b/5MmBXW9A/terminal-app
 
 ## Help / Installation
 
+*** NOTE: you will need to have ruby installed ***
+
+1. Download the code from github
+2. Open the code's folder in terminal and run `gem install bundler`
+3. Run `bundle install`
+4. Run `ruby ./src/index.rb` or navigate to the src folder and run `./run_app.sh`
