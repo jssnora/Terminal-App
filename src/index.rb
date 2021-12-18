@@ -4,13 +4,16 @@ require "tty-table"
 require "dotenv/load"
 require "colorize"
 
+#API key "b62d4795f596daf817763620b626ddcb"
+
 prompt = TTY::Prompt.new
 
 $city_name = nil
 $latitude = nil
 $longitude = nil
 
-def validate_city(city)
+#passes formatted city name through API to check if the city exist. If city exist, set global variables city_name, longitude and latitude to be used for weather data API call.It will also return error msgs if input is invalid.
+def validate_city(city) 
     api_key = ENV["api_key"]
     response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?q=#{city},au&units=metric&appid=#{api_key}").parsed_response
 
@@ -26,6 +29,7 @@ def validate_city(city)
     end
 end
 
+#similar to validate city method, this method will check if the post code exist. If so, it will set the globle variables. It will also return error msgs if input is invalid.
 def validate_postcode(postcode)
     api_key = ENV["api_key"]
     response = HTTParty.get("http://api.openweathermap.org/data/2.5/weather?zip=#{postcode},au&units=metric&appid=#{api_key}").parsed_response
@@ -43,6 +47,7 @@ def validate_postcode(postcode)
     end
 end
 
+#change city method will prompt user to select a city. It also checks and formats user input before passing it through the validate city/postcode methods.
 def change_city
     prompt = TTY::Prompt.new
     search_method = prompt.select("Please choose an option to view the weather:", ["Search by city name", "Search by postcode"])
@@ -64,11 +69,13 @@ def change_city
     end
 end
 
+#this method retrieves weather data from API using the longitude and latitude variables set by the change city method
 def get_weather_data
     api_key = ENV["api_key"]
     response = HTTParty.get("http://api.openweathermap.org/data/2.5/onecall?lat=#{$latitude}&lon=#{$longitude}&exclude=minutely&units=metric&appid=#{api_key}").parsed_response
 end
 
+#filters specific info from the API response and formats the data so it can be displayed correctly in the gem TTY table
 def format_seven_day_data(response)
     daily_weather = Array.new
     for day in response["daily"]
@@ -83,6 +90,7 @@ def format_seven_day_data(response)
     return daily_weather
 end
 
+#similar to the above method
 def format_todays_weather_data(response)
     daily_weather = Array.new
     weather_info = Array.new
@@ -104,6 +112,7 @@ end
 seven_day_table_header = ["Date", "Condition", "Max temperature", "Min temperature", "Chance of rain"]
 todays_weather_table_header = ["Date", "Condition", "Max temperature", "Min temperature", "Feels like", "Chance of rain", "UV Index", "Wind speed", "Humidity", "Sunrise/sunset time"]
 
+#creates table with formatted data
 def table(header_array, data_array)
     table = TTY::Table.new(header_array, data_array)
     puts table.render(:unicode)
